@@ -1,10 +1,10 @@
 import { initializeApp, cert, getApps } from "firebase-admin/app"
-import { getFireStore } from "firebase-admin/firestore"
-//TODO: import service account from secrets.js
+import { getFirestore } from "firebase-admin/firestore"
+import { service_account } from "../secrets.js"
 
 // by using default it stops it from destructing 
 // when imported
-export default dbConnect = () => {
+export default function dbConnect() {
     // check if NOT connected
     if (!getApps()) {
         // connect
@@ -13,5 +13,5 @@ export default dbConnect = () => {
         })
     }
     // return db-connection
-    return getFireStore()
+    return getFirestore()
 }   

@@ -1,23 +1,59 @@
-import dbConnect from "./src/dbConnect.js" // import db connection
+import dbConnect from "./dbConnect.js"// import db connection
 
-export const getAllRestaurants = (req,res) => {
+const colletionName = 'restaurants'
+
+//! GET
+export const getAllRestaurants = async (req,res) => {
     const db = dbConnect()
-    res.send('All Restaurants')
+    // query to get all data 
+    const collection = db.collection(colletionName).get()
+    const restaurants = (await collection).docs.map( (element) => {
+        return rest = element.data()
+    })
+
+    res.send(restaurants)
 }
 
-export const getRestaurantById = (req,res) => {
+//! GET DOC
+export const getRestaurantById = async (req,res) => {
     const db = dbConnect()
-
     // using destructuring to pull restId
     // from the object req.params
     const { restId  } = req.params
-    res.send(`Got Restaurant: ${restId}`)
+    // compare to first firestore file
+    const doc = db.colletion(colletionName).doc(restId).get()
+    const rest = doc.data()
+
+    res.send(`Got Restaurant: ${rest}`)
 }
 
-export const createResturant = (req,res) => {
+//! CREATE
+export const createResturant = async (req,res) => {
     const db = dbConnect()
 
     // req.body means it the request that is coming will have a body
     const newRestaurant = req.body 
+    await db.collection(colletionName).add(newRestaurant)
     res.status(201).send('Added Restaurant')
+}
+
+//! UPDATE
+export const updateRestaurant = async (req,res) => {
+    const { restId } = req.params
+    const updateInfo = req.body
+
+    const db = dbConnect()
+
+    await db.collection(colletionName).doc(restId).update(updateInfo)
+    res.status(202).send('Restaurant Updated')
+}
+
+//! DELETE
+
+export const deleteRestaurant = async (req,res) => {
+    const { restId } = req.params
+    
+    const db = dbConnect()
+    await db.collection(colletionName).doc(restId).delete()
+    res.send("Restaurant Deleted")
 }
