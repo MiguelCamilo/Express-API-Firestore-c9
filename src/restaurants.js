@@ -1,6 +1,12 @@
 import dbConnect from "./dbConnect.js"// import db connection
+import { initializeApp, cert, getApps } from "firebase-admin/app"
+import { service_account } from "../secrets.js"
 
 const colletionName = 'restaurants'
+
+initializeApp({
+	credential: cert(service_account),
+});
 
 //! GET
 export const getAllRestaurants = async (req,res) => {
@@ -50,10 +56,10 @@ export const updateRestaurant = async (req,res) => {
 
 //! DELETE
 
-export const deleteRestaurant = async (req,res) => {
-    const { restId } = req.params
+// export const deleteRestaurant = async (req,res) => {
+//     const { restId } = req.params
     
-    const db = dbConnect()
-    await db.collection(colletionName).doc(restId).delete()
-    res.send("Restaurant Deleted")
-}
+//     const db = dbConnect()
+//     await db.collection(colletionName).doc(restId).delete()
+//     res.send("Restaurant Deleted")
+// }
