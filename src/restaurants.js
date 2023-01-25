@@ -51,6 +51,9 @@ export const updateRestaurant = async (req,res) => {
     const updateInfo = req.body
 
     const db = dbConnect()
+    
+    // added an update timestamp when data is manipulated
+    updateInfo.updateAt = FieldValue.serverTimestamp()
 
     await db.collection(colletionName).doc(restId).update(updateInfo)
     res.status(202).send('Restaurant Updated')
