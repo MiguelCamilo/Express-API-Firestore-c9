@@ -5,8 +5,8 @@ import { service_account } from "../secrets.js"
 // by using default it stops it from destructing 
 // when imported
 export default function dbConnect() {
-    // check if NOT connected
-    if (!getApps()) {
+    // if getApps() has a length of zero
+    if (!getApps().length) {
         // connect
         initializeApp({
             credential: cert(service_account)

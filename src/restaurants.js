@@ -1,35 +1,32 @@
 import dbConnect from "./dbConnect.js"// import db connection
-import { initializeApp, cert, getApps } from "firebase-admin/app"
-import { service_account } from "../secrets.js"
+import { FieldValue } from "firebase-admin/firestore" 
 
-const colletionName = 'subway'
+const colletionName = 'restaurants'
 
-initializeApp({
-	credential: cert(service_account),
-});
+//! CREATE
+export const createResturant = async (req,res) => {
+    const db = dbConnect()
+    // req.body means it the request that is coming will have a body
+    let newRestaurant = req.body
 
+    // this is adding a value to newRestaurant object
+    newRestaurant.createdAt = FieldValue.serverTimestamp() // then add a timestamp to the new restaurant
 
-const pizza_Hawaiian = {
-    type: "Hawaiian",
-    ingredients: "pineapple , tomato , cheese , ham",
-    addons: "black pepper , parmesan cheese",
-    size: "large",
-    price: 13.99,
-    togo: false
-};
+    await db.collection(colletionName).add(newRestaurant)
+    res.status(201).send('Added Restaurant')
+}
 
 
-//! GET
+//! GET DOC DATA
 export const getAllRestaurants = async (req,res) => {
     const db = dbConnect()
     // query to get all data 
-    const collection = await db.collection(colletionName).get()
+    // .orderBy() says to order by the timestamp above in descending order
+    const collection = await db.collection(colletionName).orderBy('createdAt', 'desc').get()
 
-    const restaurants =  collection.docs.map( (element) => {
-        let food = element.data()
-        food.id = element.id
-        return food
-    })
+    // maps the data and returns it                                            // this adds value id
+    const restaurants =  collection.docs.map( element =>  ({...element.data(), restId: element.id}))
+
     console.table(restaurants)
     res.send(restaurants)
 }
@@ -47,32 +44,23 @@ export const getRestaurantById = async (req,res) => {
     res.send(`Got Restaurant: ${rest}`)
 }
 
-//! CREATE
-export const createResturant = async (req,res) => {
+//! UPDATE
+//TODO: 
+export const updateRestaurant = async (req,res) => {
+    const { restId } = req.params
+    const updateInfo = req.body
+
     const db = dbConnect()
 
-    // req.body means it the request that is coming will have a body
-    await db.collection(colletionName).add(pizza_Hawaiian)
-    res.status(201).send('Added Restaurant')
+    await db.collection(colletionName).doc(restId).update(updateInfo)
+    res.status(202).send('Restaurant Updated')
 }
 
-//! UPDATE
-// export const updateRestaurant = async (req,res) => {
-//     const { restId } = req.params
-//     const updateInfo = req.body
-
-//     const db = dbConnect()
-
-//     await db.collection(colletionName).doc(restId).update(updateInfo)
-//     res.status(202).send('Restaurant Updated')
-// }
-
 //! DELETE
-
-// export const deleteRestaurant = async (req,res) => {
-//     const { restId } = req.params
+export const deleteRestaurant = async (req,res) => {
+    const { restId } = req.params
     
-//     const db = dbConnect()
-//     await db.collection(colletionName).doc(restId).delete()
-//     res.send("Restaurant Deleted")
-// }
+    const db = dbConnect()
+    await db.collection(colletionName).doc(restId).delete()
+    res.send("Restaurant Deleted")
+}
